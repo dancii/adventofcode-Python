@@ -7,15 +7,21 @@ def main():
 
     ip_count = 0
     for ip in ips:
-        print(ip)
+        #print(ip)
+        #print('Inside brackets', len(inside_brackets))
         inside_brackets = re.findall(r"\[(\w+)\]", ip)
-        print('Inside brackets', len(inside_brackets))
-
         if four_char_seq_inside(inside_brackets) == True:
             continue
 
-        outside_brackets = re.findall(r'(.*?)\[.*?\]', ip)
-        print('Outside brackets', outside_brackets)
+
+        outside_brackets_regex_list = re.findall(r'[^[]+(?=\[[^]]*]|$)', ip)
+        outside_brackets = []
+        for string_outside_brackets_unsorted in outside_brackets_regex_list:
+            try:
+                outside_brackets.append(string_outside_brackets_unsorted.split(']')[1])
+            except IndexError:
+                outside_brackets.append(string_outside_brackets_unsorted.split(']')[0])
+
         if four_char_seq_outside(outside_brackets) == True:
             ip_count+=1
 
@@ -26,9 +32,10 @@ def four_char_seq_inside(char_seqs):
         for x in range(0, len(char_seq)-3):
             first_part = char_seq[x] + char_seq[x+1]
             sec_part = char_seq[x+2] + char_seq[x+3]
-            if first_part[0] == sec_part[0]:
-                return True
             if first_part == sec_part[::-1]:
+                if first_part == sec_part:
+                    return False
+                #print(first_part, sec_part)
                 return True
 
 def four_char_seq_outside(char_seqs):
@@ -36,9 +43,58 @@ def four_char_seq_outside(char_seqs):
         for x in range(0, len(char_seq)-3):
             first_part = char_seq[x] + char_seq[x+1]
             sec_part = char_seq[x+2] + char_seq[x+3]
-            if first_part[0] == sec_part[0]:
-                return False
             if first_part == sec_part[::-1]:
+                if first_part == sec_part:
+                    print(first_part, sec_part)
+                    return False
                 return True
 
-main()
+def main2():
+    ips = open('input.txt').read().strip().split('\n')
+
+    ip_count = 0
+    for ip in ips:
+        outside_brackets_regex_list = re.findall(r'[^[]+(?=\[[^]]*]|$)', ip)
+        outside_brackets = []
+        for string_outside_brackets_unsorted in outside_brackets_regex_list:
+            try:
+                outside_brackets.append(string_outside_brackets_unsorted.split(']')[1])
+            except IndexError:
+                outside_brackets.append(string_outside_brackets_unsorted.split(']')[0])
+        aba = ssl_outside(outside_brackets)
+        if aba == False:
+            continue
+        else:
+            inside_brackets = re.findall(r"\[(\w+)\]", ip)
+            if ssl_inside(inside_brackets, aba) == True:
+                ip_count+=1
+
+    print ip_count
+
+def ssl_outside(char_seqs):
+    for char_seq in char_seqs:
+        for x in range(0, len(char_seq)-2):
+            aba_text = char_seq[x]+char_seq[x+1]+char_seq[x+2]
+            if aba_text == aba_text[::-1]:
+                if aba_text == len(aba_text) * aba_text[0]:
+                    continue
+                return aba_text
+    return False
+
+def ssl_inside(char_seqs, aba):
+    for char_seq in char_seqs:
+        for x in range(0, len(char_seq)-2):
+            bab_text = char_seq[x]+char_seq[x+1]+char_seq[x+2]
+            if check_aba_bab(aba, bab_text) == True:
+                return True
+    return False
+
+def check_aba_bab(aba,bab):
+    if aba[0] == bab[1] and aba[1] == bab[0] and aba[1] == bab[2]:
+        #print('True',aba, bab)
+        return True
+    else:
+        #print('False',aba, bab)
+        return False
+
+main2()
