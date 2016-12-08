@@ -61,32 +61,36 @@ def main2():
                 outside_brackets.append(string_outside_brackets_unsorted.split(']')[1])
             except IndexError:
                 outside_brackets.append(string_outside_brackets_unsorted.split(']')[0])
-        aba = ssl_outside(outside_brackets)
-        if aba == False:
+        abas = ssl_outside(outside_brackets)
+        if abas == False:
             continue
         else:
             inside_brackets = re.findall(r"\[(\w+)\]", ip)
-            if ssl_inside(inside_brackets, aba) == True:
+            if ssl_inside(inside_brackets, abas) == True:
                 ip_count+=1
 
     print ip_count
 
 def ssl_outside(char_seqs):
+    abas = []
     for char_seq in char_seqs:
         for x in range(0, len(char_seq)-2):
             aba_text = char_seq[x]+char_seq[x+1]+char_seq[x+2]
             if aba_text == aba_text[::-1]:
                 if aba_text == len(aba_text) * aba_text[0]:
                     continue
-                return aba_text
+                abas.append(aba_text)
+    if len(abas) > 0:
+        return abas
     return False
 
-def ssl_inside(char_seqs, aba):
+def ssl_inside(char_seqs, abas):
     for char_seq in char_seqs:
         for x in range(0, len(char_seq)-2):
             bab_text = char_seq[x]+char_seq[x+1]+char_seq[x+2]
-            if check_aba_bab(aba, bab_text) == True:
-                return True
+            for aba in abas:
+                if check_aba_bab(aba, bab_text) == True:
+                    return True
     return False
 
 def check_aba_bab(aba,bab):
